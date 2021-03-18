@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 
 from . import util
@@ -24,3 +25,7 @@ def wiki(request, title):
     return render(request, "encyclopedia/not-found.html", {
         "title": title
     })
+
+
+def query(reques, query):
+    return HttpResponse("Hello " + query)
