@@ -1,14 +1,25 @@
 {% extends "encyclopedia/layout.html" %}
 
 {% block title %}
-Encyclopedia - Error 404: Not Found
+Encyclopedia - No match
 {% endblock %}
 
 {% block body %}
 
-<h1>Error 404</h1>
-<h2>Not Found</h2>
+<h2>No Match</h2>
 <p>The Article "{{ title }}" you are looking for does not <b>yet</b> exist.</p>
 <a href="#">Create it!</a>
+
+{% if results %}
+
+<p>Or perhaps you are looking for...</p>
+
+<ul>
+  {% for entry in results %}
+  <li>{{ entry }}</li>
+  {% endfor %}
+</ul>
+
+{% endif %}
 
 {% endblock %}

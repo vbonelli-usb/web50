@@ -1,5 +1,5 @@
-from django.http import HttpResponse, HttpResponseNotFound
-from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render ,reverse
 
 from . import util
 
@@ -12,24 +12,23 @@ def index(request):
     })
 
 
-def matchEntry(request, title):
+def matchEntry(title):
     for entryTitle in util.list_entries():
-        if re.match(title, entryTitle, re.IGNORECASE):
-            entry = util.get_entry(entryTitle)
-            return render(request, "encyclopedia/single.html", {
-                "title": entryTitle,
-                "entry": entry
-            })
+        if re.match(f"^{title}$", entryTitle, re.IGNORECASE):
+            return util.get_entry(entryTitle)
 
     return None
 
 def wiki(request, title):
 
-    entryQuery = matchEntry(request, title)
+    entry = matchEntry(title)
 
     return (
-        entryQuery 
-        if entryQuery else 
+        render(request, "encyclopedia/single.html", {
+                "title": title,
+                "entry": entry
+            })        
+        if entry else 
         render(
             request,
             "encyclopedia/not-found.html",
@@ -40,22 +39,29 @@ def wiki(request, title):
         )
     )
 
-def searchQuery(request, query):
+def searchQueries(request, query):
+    results = []
+
+    for entryTitle in util.list_entries():
+        if re.match(f".*{query}.*", entryTitle, re.IGNORECASE):
+            results.append(util.get_entry(entryTitle))
+
     return render(
             request,
             "encyclopedia/no-match.html",
             {
-                "title": query
+                "title": query,
+                "results": results
             },
-            status=404
+            status=300
         )
 
 def query(request, query):
 
-    entryQuery = matchEntry(request, query)
+    entryQuery = matchEntry(query)
 
     return (
-        entryQuery 
+        HttpResponseRedirect(reverse("single", args=[query])) 
         if entryQuery else 
-        searchQuery(request, query)
+        searchQueries(request, query)
     )
