@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render
 
 from . import util
@@ -22,10 +22,17 @@ def wiki(request, title):
                 "entry": entry
             })
 
-    return render(request, "encyclopedia/not-found.html", {
-        "title": title
-    })
+    return render(
+        request,
+        "encyclopedia/not-found.html",
+        {
+            "title": title
+        },
+        status=404)
 
 
-def query(reques, query):
+def query(request, query):
+
+    entryList = util.list_entries()
+
     return HttpResponse("Hello " + query)
