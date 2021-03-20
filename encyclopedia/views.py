@@ -6,14 +6,20 @@ from . import util
 
 import re
 
-class SearchForm(forms.Form):
-    query = forms.CharField(label="Search:")
+class CreateForm(forms.Form):
+    title = forms.CharField(label="Title", max_length=30)
+    content = forms.CharField(label="Content", widget=forms.Textarea)
+
+def create(request):
+    form = CreateForm()
+    return render(request, "encyclopedia/create.html", {
+        "form": form
+    })
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
         "entries": util.list_entries()
     })
-
 
 def matchEntry(title):
     for entryTitle in util.list_entries():

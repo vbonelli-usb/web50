@@ -9,6 +9,6 @@ Encyclopedia - Error 404: Not Found
 <h1>Error 404</h1>
 <h2>Not Found</h2>
 <p>The Article "{{ title }}" you are looking for does not <b>yet</b> exist.</p>
-<a href="#">Create it!</a>
+<a href="{% url 'create' %}">Create it!</a>
 
 {% endblock %}
