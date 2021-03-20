@@ -7,7 +7,7 @@ Encyclopedia - No match
 {% block body %}
 
 <h2>No Match</h2>
-<p>The Article "{{ title }}" you are looking for does not <b>yet</b> exist.</p>
+<p>The Article "{{ query }}" you are looking for does not <b>yet</b> exist.</p>
 <a href="#">Create it!</a>
 
 {% if results %}
@@ -16,7 +16,7 @@ Encyclopedia - No match
 
 <ul>
   {% for entry in results %}
-  <li>{{ entry }}</li>
+  <li><a href="{% url 'single' entry.title %}"> {{ entry.title }} </a></li>
   {% endfor %}
 </ul>
 
