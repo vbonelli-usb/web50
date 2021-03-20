@@ -1,10 +1,13 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render ,reverse
+from django import forms
 
 from . import util
 
 import re
 
+class SearchForm(forms.Form):
+    query = forms.CharField(label="Search:")
 
 def index(request):
     return render(request, "encyclopedia/index.html", {
@@ -56,7 +59,9 @@ def searchQueries(request, query):
             status=300
         )
 
-def query(request, query):
+def query(request):
+
+    query = request.GET['q']
 
     entryQuery = matchEntry(query)
 
