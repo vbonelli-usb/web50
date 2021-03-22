@@ -2,14 +2,38 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, reverse
 
 from . import util
+
+# Module develeped to manipulate the entries data
 from . import entries
 
 
 def create(request):
-    form = entries.CreateForm()
+    errors = []
+    if request.method == "POST":
+        form = entries.CreateForm(request.POST)
+
+        if form.is_valid():
+            title = form.cleaned_data["title"]
+            if entries.matchEntry(title):
+                status = 409
+                errors.append(
+                    """This entry have already been created.
+                    You can edit in the article page.""")
+            else:
+                util.save_entry(
+                    title,
+                    form.cleaned_data["content"])
+                return HttpResponseRedirect(reverse("single", args=[title]))
+
+    if request.method == "GET":
+        form = entries.CreateForm()
+        status = 200
+
     return render(request, "encyclopedia/create.html", {
-        "form": form
-    })
+        "form": form,
+        "errors": errors
+    },
+        status=status)
 
 
 def wiki(request, title):
@@ -37,13 +61,17 @@ def query(request):
 
     query = request.GET['q']
 
-    entryQuery = entries.matchEntry(query)
+    if query:
 
-    return (
-        HttpResponseRedirect(reverse("single", args=[query]))
-        if entryQuery else
-        entries.searchQueries(request, query)
-    )
+        entryQuery = entries.matchEntry(query)
+
+        return (
+            HttpResponseRedirect(reverse("single", args=[query]))
+            if entryQuery else
+            entries.searchQueries(request, query)
+        )
+    else:
+        return HttpResponseRedirect(reverse("index"))
 
 
 def index(request):

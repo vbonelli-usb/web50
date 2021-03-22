@@ -21,21 +21,18 @@ def matchEntry(title):
 def searchQueries(request, query):
     results = []
 
-    if query != "":
-        for entryTitle in util.list_entries():
-            if re.match(f".*{query}.*", entryTitle, re.IGNORECASE):
-                results.append({
-                    "content": util.get_entry(entryTitle),
-                    "title": entryTitle})
+    for entryTitle in util.list_entries():
+        if re.match(f".*{query}.*", entryTitle, re.IGNORECASE):
+            results.append({
+                "content": util.get_entry(entryTitle),
+                "title": entryTitle})
 
-        return render(
-            request,
-            "encyclopedia/no-match.html",
-            {
-                "query": query,
-                "results": results
-            },
-            status=300
-        )
-    else:
-        return HttpResponseRedirect(reverse("index"))
+    return render(
+        request,
+        "encyclopedia/no-match.html",
+        {
+            "query": query,
+            "results": results
+        },
+        status=300
+    )
