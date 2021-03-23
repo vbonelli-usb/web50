@@ -2,15 +2,28 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, reverse
 
 from . import util
+import markdown2 as md
 
 # Module develeped to manipulate the entries data
 from . import entries
 
 
+def edit(request, title):
+    entry = entries.matchEntry(title)
+
+    # if entry:
+    #     form = entries.EntryForm(
+    #         initial={
+    #             "content": entry
+    #         }
+    #     )
+    return HttpResponse(entry)
+
+
 def create(request):
     errors = []
     if request.method == "POST":
-        form = entries.CreateForm(request.POST)
+        form = entries.EntryForm(request.POST)
 
         if form.is_valid():
             title = form.cleaned_data["title"]
@@ -26,7 +39,7 @@ def create(request):
                 return HttpResponseRedirect(reverse("single", args=[title]))
 
     if request.method == "GET":
-        form = entries.CreateForm()
+        form = entries.EntryForm()
         status = 200
 
     return render(request, "encyclopedia/create.html", {
@@ -43,7 +56,7 @@ def wiki(request, title):
     return (
         render(request, "encyclopedia/single.html", {
             "title": title,
-            "entry": entry
+            "entry": md.markdown(entry)
         })
         if entry else
         render(

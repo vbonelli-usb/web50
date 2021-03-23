@@ -1,13 +1,20 @@
 from django import forms
 from django.shortcuts import render, reverse
+from django.template import Template, Context, Engine
+
+import markdown2 as md
 import re
 
 from . import util
 
 
-class CreateForm(forms.Form):
+class EntryForm(forms.Form):
     title = forms.CharField(label="Title", max_length=30)
     content = forms.CharField(label="Content", widget=forms.Textarea)
+
+
+def get_title(entry):
+    return 0
 
 
 def matchEntry(title):
