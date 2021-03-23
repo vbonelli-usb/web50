@@ -13,8 +13,18 @@ class EntryForm(forms.Form):
     content = forms.CharField(label="Content", widget=forms.Textarea)
 
 
-def get_title(entry):
-    return 0
+def getEntryElements(entryMD):
+    # entryHTML = md.markdown(entryMD)
+    # matchEntry = re.match(r"<h1>(?P<title>.*)<\/h1>\n\n", entryHTML)
+    matchEntry = re.match(r"#(?P<title>.*)\W*", entryMD)
+    if matchEntry:
+        title = matchEntry.group("title")
+        content = entryMD[matchEntry.end():]
+        return {
+            "title": title,
+            "content": content, }
+    else:
+        return None
 
 
 def matchEntry(title):

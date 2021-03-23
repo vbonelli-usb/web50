@@ -9,15 +9,19 @@ from . import entries
 
 
 def edit(request, title):
-    entry = entries.matchEntry(title)
+    entryRaw = entries.matchEntry(title)
 
-    # if entry:
-    #     form = entries.EntryForm(
-    #         initial={
-    #             "content": entry
-    #         }
-    #     )
-    return HttpResponse(entry)
+    entry = entries.getEntryElements(entryRaw)
+
+    if entry:
+        form = entries.EntryForm(
+            initial=entry
+        )
+        return render(request, "encyclopedia/edit.html", {
+            "form": form,
+        })
+
+    return HttpResponse([entry, entryRaw])
 
 
 def create(request):
