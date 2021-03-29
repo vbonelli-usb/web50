@@ -1,6 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, reverse
 
+import re
+
 from . import util
 import markdown2 as md
 
@@ -9,19 +11,37 @@ from . import entries
 
 
 def edit(request, title):
-    entryRaw = entries.matchEntry(title)
+    errors = []
 
-    entry = entries.getEntryElements(entryRaw)
+    if request.method == "POST":
+        form = entries.EntryForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data["title"]
+            if entries.matchEntry(title):
+                content = re.sub(r"(\r\n){2,}", "\r\n", form.cleaned_data["content"])
+                formattedContent = entries.formatContent(title, content)
+                util.save_entry(title, formattedContent)
+                return HttpResponseRedirect(reverse("single", args=[title]))
+            else:
+                return HttpResponseRedirect(reverse("create"))
+        else:
+            errors.append("No valid input")
 
-    if entry:
-        form = entries.EntryForm(
-            initial=entry
-        )
-        return render(request, "encyclopedia/edit.html", {
-            "form": form,
-        })
+    if request.method == "GET":
+        entryRaw = entries.matchEntry(title)
+        if entryRaw:
+            entry = entries.getEntryElements(entryRaw)
+            form = entries.EntryForm(
+                initial=entry
+            )
+        else:
+            return HttpResponseRedirect(reverse("create"))
 
-    return HttpResponse([entry, entryRaw])
+    return render(request, "encyclopedia/edit.html", {
+        "form": form,
+        "errors": errors
+    })
+            
 
 
 def create(request):
@@ -37,9 +57,10 @@ def create(request):
                     """This entry have already been created.
                     You can edit in the article page.""")
             else:
+                formattedContent = entries.formatContent(title, form.cleaned_data["content"])
                 util.save_entry(
                     title,
-                    form.cleaned_data["content"])
+                    formattedContent)
                 return HttpResponseRedirect(reverse("single", args=[title]))
 
     if request.method == "GET":

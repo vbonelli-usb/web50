@@ -9,7 +9,6 @@ Encyclopedia - Create
 {% for formError in errors %}
 <div class="alert alert-danger">
   {{ formError }}
-  <a href="{% url 'single' form.cleaned_data.title %}">Here</a>
 </div>
 {% endfor %}
 

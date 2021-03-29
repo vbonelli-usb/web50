@@ -1,6 +1,5 @@
 from django import forms
 from django.shortcuts import render, reverse
-from django.template import Template, Context, Engine
 
 import markdown2 as md
 import re
@@ -13,10 +12,11 @@ class EntryForm(forms.Form):
     content = forms.CharField(label="Content", widget=forms.Textarea)
 
 
+
 def getEntryElements(entryMD):
     # entryHTML = md.markdown(entryMD)
     # matchEntry = re.match(r"<h1>(?P<title>.*)<\/h1>\n\n", entryHTML)
-    matchEntry = re.match(r"#(?P<title>.*)\W*", entryMD)
+    matchEntry = re.match(r"# (?P<title>.*)\n*", entryMD)
     if matchEntry:
         title = matchEntry.group("title")
         content = entryMD[matchEntry.end():]
@@ -25,6 +25,9 @@ def getEntryElements(entryMD):
             "content": content, }
     else:
         return None
+
+def formatContent(title, content):
+    return f"# {title}\n\n{content}"
 
 
 def matchEntry(title):

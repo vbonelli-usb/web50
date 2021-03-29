@@ -1,16 +1,23 @@
 {% extends "encyclopedia/layout.html" %}
 
 {% block title %}
-Encyclopedia - Edit 
+Encyclopedia - Edit
 {% endblock %}
 
 {% block body %}
 
+{% for formError in errors %}
+<div class="alert alert-danger">
+  {{ formError }}
+</div>
+{% endfor %}
+
 <form action="{% url 'edit' form.title.value %}" method="POST">
   {% csrf_token %}
   <h1>{{ form.title.value }}</h1>
+  {{ form.title.as_hidden }}
   <label for="{{ form.content.id_for_label }}">Content:</label>
-  {{ form.content }}
+  {{ form.content|safe }}
   <input type="submit" value="Save">
 </form>
 
