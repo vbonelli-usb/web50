@@ -10,6 +10,10 @@ import markdown2 as md
 from . import entries
 
 
+def random(request):
+    return HttpResponseRedirect(reverse("single", args=[entries.getRandomEntry()]))
+
+
 def edit(request, title):
     errors = []
 

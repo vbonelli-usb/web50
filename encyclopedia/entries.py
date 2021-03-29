@@ -2,6 +2,7 @@ from django import forms
 from django.shortcuts import render, reverse
 
 import markdown2 as md
+import random as rd
 import re
 
 from . import util
@@ -10,6 +11,11 @@ from . import util
 class EntryForm(forms.Form):
     title = forms.CharField(label="Title", max_length=30)
     content = forms.CharField(label="Content", widget=forms.Textarea)
+
+def getRandomEntry():
+    entries = util.list_entries()
+    entryID = rd.randint(0, len(entries) - 1)
+    return entries[entryID]
 
 
 
