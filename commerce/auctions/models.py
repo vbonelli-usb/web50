@@ -4,8 +4,17 @@ from django.db import models
 
 class AuctionListings(models.Model):
     img = models.CharField()
-    price = models.DecimalField(decimal_places=2)
+    startingPrice = models.DecimalField(decimal_places=2)
     description = models.CharField(max_length=300)
+
+
+class Bids(models.Model):
+    offer = models.DecimalField(decimal_places=2)
+
+
+class Comments(models.Model):
+    content = models.TextField(max_length=400)
+    author =
 
 
 class User(AbstractUser):
