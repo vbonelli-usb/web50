@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import datetime as dt
+from django.forms import ModelForm
 
 
 class User(AbstractUser):
@@ -37,3 +38,9 @@ class Comment(models.Model):
     author = models.ManyToManyField(User, blank=False, related_name="comment")
     auction = models.ManyToManyField(
         AuctionListing, blank=False, related_name="comment")
+
+
+def CreateAuctionForm(ModelForm):
+    class Meta:
+        model = AuctionListing
+        fields = ['img', 'Title', 'description', 'Starting Price']

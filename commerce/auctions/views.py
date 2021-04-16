@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, AuctionListing, Bid, Comment
+from .models import User, AuctionListing, Bid, Comment, CreateAuctionForm
 
 
 def index(request):
@@ -14,7 +14,10 @@ def index(request):
 
 @login_required(login_url='login')
 def create(request):
-    return render(request, "auctions/create.html")
+    form = CreateAuctionForm()
+    return render(request, "auctions/create.html", {
+        "form": form
+    })
 
 
 def login_view(request):
