@@ -14,7 +14,7 @@ def index(request):
 
 @login_required(login_url='login')
 def create(request):
-    form = CreateAuctionForm()
+    form = CreateAuctionForm(None)
     return render(request, "auctions/create.html", {
         "form": form
     })

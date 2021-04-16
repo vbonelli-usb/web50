@@ -40,7 +40,7 @@ class Comment(models.Model):
         AuctionListing, blank=False, related_name="comment")
 
 
-def CreateAuctionForm(ModelForm):
+class CreateAuctionForm(ModelForm):
     class Meta:
         model = AuctionListing
         fields = ['img', 'Title', 'description', 'Starting Price']
