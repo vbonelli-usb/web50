@@ -14,10 +14,15 @@ def index(request):
 
 @login_required(login_url='login')
 def create(request):
-    form = CreateAuctionForm(None)
-    return render(request, "auctions/create.html", {
-        "form": form
-    })
+    form = CreateAuctionForm(request.POST or None)
+    if request.method == "POST":
+        print("to post")
+        form.save()
+
+    else:
+        return render(request, "auctions/create.html", {
+            "form": form
+        })
 
 
 def login_view(request):

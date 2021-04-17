@@ -16,7 +16,7 @@ class AuctionListing(models.Model):
         max_digits=9, decimal_places=2, name="Starting Price")
     auctionStarts = models.DateTimeField(
         auto_now_add=True, auto_now=False, name="Starts")
-    auctionEnds = models.DurationField(name="Duration")
+    auctionEnds = models.DateTimeField(name="Duration", editable=False)
 
     def __str__(self):
         return f'{self.Title} #{self.id}'
@@ -43,4 +43,4 @@ class Comment(models.Model):
 class CreateAuctionForm(ModelForm):
     class Meta:
         model = AuctionListing
-        fields = ['img', 'Title', 'description', 'Starting Price']
+        fields = ['Title', 'img', 'description', 'Starting Price']
