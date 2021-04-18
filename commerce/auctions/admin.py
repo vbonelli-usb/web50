@@ -3,7 +3,7 @@ from .models import Bid, Comment, AuctionListing, User
 
 
 class AuctionAdmin(admin.ModelAdmin):
-    list_display = ("Title", "id", "Starts", "Duration", "Starting Price")
+    list_display = ("Title", "id", "Starts", "Ends", "Starting Price")
 
 
 # Register your models here.
