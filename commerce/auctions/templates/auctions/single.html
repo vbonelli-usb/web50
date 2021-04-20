@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h2>{{ auction.Title }}</h2>
+
+{% if auction.img %}
+<img src="{{ auction.img }}" alt="Auction image">
+{% endif %}
+<p>
+    {{ auction.description }}
+</p>
+<p>
+    {{ auction.startinPrice}}
+</p>
+<strong>
+    {{ auction.Ends }}
+</strong>
+<hr>
+<a href="{% url 'index' %}">Go to the list</a>
+{% endblock %}

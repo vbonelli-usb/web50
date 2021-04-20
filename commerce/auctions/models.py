@@ -9,7 +9,7 @@ class User(AbstractUser):
 
 
 class AuctionListing(models.Model):
-    img = models.CharField(max_length=200)
+    img = models.CharField(max_length=200, blank=True)
     title = models.CharField(max_length=40, name="Title")
     description = models.CharField(max_length=300)
     startingPrice = models.DecimalField(

@@ -9,7 +9,15 @@ from .models import User, AuctionListing, Bid, Comment, CreateAuctionForm
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    return render(request, "auctions/index.html", {
+        'auctions': AuctionListing.objects.all()
+    })
+
+def single(request, id):
+    auction = AuctionListing.objects.get(id = id)
+    return render(request, "auctions/single.html", {
+        'auction': auction,
+    })
 
 
 @login_required(login_url='login')
@@ -18,9 +26,10 @@ def create(request):
     if request.method == "POST":
         print("to post")
         form.save()
-
-    return render(request, "auctions/create.html", {
-        "form": form
+        return HttpResponseRedirect(reverse('index'))
+    else:
+        return render(request, "auctions/create.html", {
+            "form": form
     })
 
 
