@@ -19,10 +19,9 @@ def create(request):
         print("to post")
         form.save()
 
-    else:
-        return render(request, "auctions/create.html", {
-            "form": form
-        })
+    return render(request, "auctions/create.html", {
+        "form": form
+    })
 
 
 def login_view(request):

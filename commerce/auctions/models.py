@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import datetime as dt
-from django.forms import ModelForm
+from django.forms import ModelForm, DateTimeInput
 
 
 class User(AbstractUser):
@@ -44,3 +44,6 @@ class CreateAuctionForm(ModelForm):
     class Meta:
         model = AuctionListing
         fields = ['Title', 'img', 'description', 'Starting Price', 'Ends']
+        widgets = {
+            'Ends':DateTimeInput(attrs={'type': 'datetime-local'}),
+        }
