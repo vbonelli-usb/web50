@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -13,11 +13,21 @@ def index(request):
         'auctions': AuctionListing.objects.all()
     })
 
+
 def single(request, id):
-    auction = AuctionListing.objects.get(id = id)
+    auction = AuctionListing.objects.get(id=id)
     return render(request, "auctions/single.html", {
         'auction': auction,
     })
+
+
+@login_required(login_url='login')
+def bid(request):
+    if request.method == "POST":
+        user = get_user(request)
+        return HttpResponseRedirect(reverse('index'))
+    else:
+        return render(request, "auctions/nobid.html", status=400)
 
 
 @login_required(login_url='login')
@@ -30,7 +40,7 @@ def create(request):
     else:
         return render(request, "auctions/create.html", {
             "form": form
-    })
+        })
 
 
 def login_view(request):

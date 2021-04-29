@@ -15,6 +15,13 @@
 <strong>
     {{ auction.Ends }}
 </strong>
+
+<form action="{% url 'bid' %}" method="post">
+    {% csrf_token %}
+    <input type="number" name="offering" id="offering-bif">
+    <input type="hidden" name="id" value="{{ auction.id }}">
+    <input type="submit" value="bid">
+</form>
 <hr>
 <a href="{% url 'index' %}">Go to the list</a>
 {% endblock %}
