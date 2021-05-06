@@ -24,7 +24,9 @@ def single(request, id):
 @login_required(login_url='login')
 def bid(request):
     if request.method == "POST":
-        user = get_user(request)
+        # auction = AuctionListing.objects.get(id=)
+        # bid_made = Bid(auction=, buyer=get_user(request))
+        print(request.get_full_path())
         return HttpResponseRedirect(reverse('index'))
     else:
         return render(request, "auctions/nobid.html", status=400)
@@ -32,9 +34,10 @@ def bid(request):
 
 @login_required(login_url='login')
 def create(request):
-    form = CreateAuctionForm(request.POST or None)
+    auction = AuctionListing()
+    auction.auctioneer.set(get_user(request))
+    form = CreateAuctionForm(request.POST or None, instance=auction)
     if request.method == "POST":
-        print("to post")
         form.save()
         return HttpResponseRedirect(reverse('index'))
     else:
