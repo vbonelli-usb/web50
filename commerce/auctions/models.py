@@ -18,7 +18,7 @@ class AuctionListing(models.Model):
         auto_now_add=True, auto_now=False, name="Starts")
     auctionEnds = models.DateTimeField(name="Ends")
     auctioneer = models.ForeignKey(
-        User, on_delete=models.CASCADE, default="", blank=False, related_name="auctions")
+        User, on_delete=models.CASCADE, default=1, blank=False, related_name="auctions")
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -49,7 +49,8 @@ class CreateAuctionForm(ModelForm):
                   'Starting Price', 'Ends', 'auctioneer', 'is_active']
         widgets = {
             'Ends': DateTimeInput(attrs={'type': 'datetime-local'}),
-            'auctioneer': HiddenInput()
+            'auctioneer': HiddenInput(),
+            'is_active':HiddenInput()
         }
 
 

@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from .modelview import sayHi, set_active_auction
 
 from .models import User, AuctionListing, Bid, Comment, CreateAuctionForm
 
@@ -35,15 +36,16 @@ def bid(request):
 @login_required(login_url='login')
 def create(request):
     auction = AuctionListing()
-    auction.auctioneer.set(get_user(request))
+    auction.auctioneer = get_user(request)
     form = CreateAuctionForm(request.POST or None, instance=auction)
     if request.method == "POST":
+        form.is_active = set_active_auction(request)
         form.save()
         return HttpResponseRedirect(reverse('index'))
-    else:
-        return render(request, "auctions/create.html", {
-            "form": form
-        })
+
+    return render(request, "auctions/create.html", {
+        "form": form
+    })
 
 
 def login_view(request):
