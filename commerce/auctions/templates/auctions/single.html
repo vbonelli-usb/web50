@@ -16,10 +16,9 @@
     {{ auction.Ends }}
 </strong>
 
-<form action="{% url 'bid' %}" method="post">
+<form action="{% url 'single' id=auction.id %}" method="post">
     {% csrf_token %}
-    <input type="number" name="offering" id="offering-bif">
-    <input type="hidden" name="id" value="{{ auction.id }}">
+    {{ form }}
     <input type="submit" value="bid">
 </form>
 <hr>

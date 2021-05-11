@@ -4,9 +4,8 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .modelview import sayHi, set_active_auction
 
-from .models import User, AuctionListing, Bid, Comment, CreateAuctionForm
+from .models import User, AuctionListing, Bid, Comment, CreateAuctionForm, BidForm
 
 
 def index(request):
@@ -17,31 +16,31 @@ def index(request):
 
 def single(request, id):
     auction = AuctionListing.objects.get(id=id)
+    user = get_user(request)
+    bid = Bid(auction=auction, buyer=user)
+    bid_form = BidForm(request.POST or None, instance=bid)
+    
+    if (request.method == 'POST'):
+        # bid.offer = int(request.POST['offer'])
+        # bid_form.offer = int(bid_form.offer)
+        print(bid_form)
+        if bid_form.is_valid():
+            return HttpResponseRedirect(reverse('index'))
+    
     return render(request, "auctions/single.html", {
         'auction': auction,
+        'form':bid_form
     })
 
 
 @login_required(login_url='login')
-def bid(request):
-    if request.method == "POST":
-        # auction = AuctionListing.objects.get(id=)
-        # bid_made = Bid(auction=, buyer=get_user(request))
-        print(request.get_full_path())
-        return HttpResponseRedirect(reverse('index'))
-    else:
-        return render(request, "auctions/nobid.html", status=400)
-
-
-@login_required(login_url='login')
 def create(request):
-    auction = AuctionListing()
-    auction.auctioneer = get_user(request)
+    auction = AuctionListing(auctioneer=get_user(request))
     form = CreateAuctionForm(request.POST or None, instance=auction)
     if request.method == "POST":
-        form.is_active = set_active_auction(request)
-        form.save()
-        return HttpResponseRedirect(reverse('index'))
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('index'))
 
     return render(request, "auctions/create.html", {
         "form": form
