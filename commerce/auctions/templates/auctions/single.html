@@ -1,6 +1,13 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+{% if can_close %}
+<form action="{% url 'close' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="id" value="{{ auction.id }}">
+    <input type="submit" value="Close Auction">
+</form>
+{% endif %}
 <h2>{{ auction.Title }}</h2>
 
 {% if auction.img %}
@@ -9,17 +16,20 @@
 <p>
     {{ auction.description }}
 </p>
-<p>
-    {{ auction.startinPrice}}
-</p>
-<strong>
-    {{ auction.Ends }}
-</strong>
+<i>Listed by {{ auction.auctioneer }}</i>
+<div id="price-tag">
+    <h4>
+        Price:
+    </h4>
+    <p>
+        {{ auction.get_highest_bid }}$
+    </p>
+</div>
 
 <form action="{% url 'single' id=auction.id %}" method="post">
     {% csrf_token %}
     {{ form }}
-    <input type="submit" value="bid">
+    <input type="submit" value="Place Bid">
 </form>
 <hr>
 <a href="{% url 'index' %}">Go to the list</a>

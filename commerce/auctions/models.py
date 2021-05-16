@@ -7,7 +7,11 @@ import datetime as dt
 
 
 class User(AbstractUser):
-    pass
+    watchlist = models.ManyToManyField(
+        'AuctionListing', related_name='watchers')
+
+    def add_auction_to_watchlist(self, auction):
+        self.watchlist.add(auction)
 
 
 class AuctionListing(models.Model):
@@ -18,26 +22,28 @@ class AuctionListing(models.Model):
         max_digits=9, decimal_places=2, name="Starting Price", validators=[MinValueValidator(0, message="Price can't be below zero (0)")])
     auctionStarts = models.DateTimeField(
         auto_now_add=True, auto_now=False, name="Starts")
-    auctionEnds = models.DateTimeField(name="Ends", validators=[is_auction_active])
     auctioneer = models.ForeignKey(
         User, on_delete=models.CASCADE, default=1, blank=False, related_name="auctions")
+    is_active = models.BooleanField(
+        default=True, null=False, blank=False, editable=False)
+    winner = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
 
     def get_highest_bid(self):
         bids = Bid.objects.filter(auction=self)
-        
-        if bids:
-            return int(bids.order_by('offer'.desc())[0])
 
-        return self.startingPrice
-        # query_set = self.bid.objects.order_by('offer'.desc())
-        # return query_set[0].offer
+        if bids:
+            return float(bids.order_by('-offer')[0].offer)
+
+        return (float(getattr(self, 'Starting Price')))
 
     def __str__(self):
         return f'{self.Title} #{self.id}'
 
 
 class Bid(models.Model):
-    offer = models.DecimalField(max_digits=9, decimal_places=2, validators=[check_bid])
+    offer = models.DecimalField(
+        max_digits=9, decimal_places=2, validators=[check_bid])
     auction = models.ForeignKey(
         AuctionListing, on_delete=models.CASCADE, default="", blank=False, related_name="bid", editable=False)
     buyer = models.ForeignKey(
@@ -46,6 +52,13 @@ class Bid(models.Model):
 
     def __str__(self):
         return f"Bid of {self.offer}$ on {self.date}"
+
+    def __call__(self):
+        highest_bid = self.auction.get_highest_bid()
+        if float(self.offer) > highest_bid:
+            return True
+        else:
+            return False
 
 
 class Comment(models.Model):
@@ -60,13 +73,14 @@ class CreateAuctionForm(ModelForm):
     class Meta:
         model = AuctionListing
         fields = ['Title', 'img', 'description',
-                  'Starting Price', 'Ends',]
-        widgets = {
-            'Ends': DateTimeInput(attrs={'type': 'datetime-local'}),
-        }
+                  'Starting Price', ]
 
 
 class BidForm(ModelForm):
     class Meta:
         model = Bid
         fields = ['offer', ]
+
+# class CloseAuctionForm(ModelForm):
+#     class Meta:
+#         model =
