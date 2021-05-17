@@ -1,8 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import fields
 from django.forms import ModelForm, DateTimeInput, HiddenInput
 from django.core.validators import MinValueValidator
-from .modelsview import is_auction_active, check_bid
+from .modelsview import check_bid
 import datetime as dt
 
 
@@ -12,6 +13,14 @@ class User(AbstractUser):
 
     def add_auction_to_watchlist(self, auction):
         self.watchlist.add(auction)
+
+    def remove_auction_from_watchlist(self, auction):
+        self.watchlist.remove(auction)
+
+
+class AuctionCategory(models.Model):
+    name = models.CharField(max_length=20, blank=False,
+                            null=False, default="no category", unique=True)
 
 
 class AuctionListing(models.Model):
@@ -27,10 +36,11 @@ class AuctionListing(models.Model):
     is_active = models.BooleanField(
         default=True, null=False, blank=False, editable=False)
     winner = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
+        User, on_delete=models.SET_NULL, null=True, blank=True, editable=False, related_name='wins')
+    category = models.ManyToManyField(AuctionCategory, )
 
     def get_highest_bid(self):
-        bids = Bid.objects.filter(auction=self)
+        bids = self.bid.all()
 
         if bids:
             return float(bids.order_by('-offer')[0].offer)
@@ -64,9 +74,10 @@ class Bid(models.Model):
 class Comment(models.Model):
     content = models.TextField(max_length=400)
     date = models.DateTimeField(auto_now_add=True, auto_now=False)
-    author = models.ManyToManyField(User, blank=False, related_name="comment")
-    auction = models.ManyToManyField(
-        AuctionListing, blank=False, related_name="comment")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, blank=False, null=False, default="", related_name="comments", editable=False)
+    auction = models.ForeignKey(
+        AuctionListing, on_delete=models.CASCADE, blank=False, null=False, default="", related_name="comments", editable=False)
 
 
 class CreateAuctionForm(ModelForm):
@@ -81,6 +92,8 @@ class BidForm(ModelForm):
         model = Bid
         fields = ['offer', ]
 
-# class CloseAuctionForm(ModelForm):
-#     class Meta:
-#         model =
+
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content', ]

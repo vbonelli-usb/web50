@@ -1,18 +1,37 @@
 from django.utils.translation import gettext as _
 from django.contrib.auth import authenticate, login, logout, get_user
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, AuctionListing, Bid, Comment, CreateAuctionForm, BidForm
+from .models import User, AuctionListing, Bid, Comment, CreateAuctionForm, BidForm, CommentForm
 
 
 def index(request):
     return render(request, "auctions/index.html", {
         'auctions': AuctionListing.objects.filter(is_active=True)
+    })
+
+
+@login_required(login_url='login')
+def my_auctions(request):
+    user = get_user(request)
+    auctions = user.auctions.all()
+    return render(request, "auctions/myauctions.html", {
+        'auctions': auctions,
+    })
+    pass
+
+
+@login_required(login_url='login')
+def wins(request):
+    user = get_user(request)
+    auctions = user.wins.all()
+    return render(request, "auctions/wins.html", {
+        'auctions': auctions,
     })
 
 
@@ -26,18 +45,61 @@ def close_auction(request):
             auction.winner = Bid.objects.order_by('-offer')[0].buyer
             auction.save()
             return HttpResponseRedirect(reverse('index'))
-        else:
-            return render(request, "auction/forbid.html", status=404)
+
+    return render(request, "auction/forbid.html", status=404)
+
+
+@login_required(login_url='login')
+def watch_auction(request):
+    if request.method == 'POST':
+        auction_id = request.POST['id']
+        auction = AuctionListing.objects.get(id=auction_id)
+        user = get_user(request)
+        if auction.auctioneer != user:
+            try:
+                user.watchlist.get(id=auction_id)
+                user.watchlist.remove(auction)
+            except ObjectDoesNotExist:
+                user.watchlist.add(auction)
+            finally:
+                user.save()
+                return HttpResponseRedirect(reverse('single', kwargs={'id': auction_id}))
+    return HttpResponseRedirect(reverse('index'))
+
+
+@login_required(login_url='login')
+def watchlist(request):
+    user = get_user(request)
+    return render(request, "auctions/watchlist.html", {
+        'auctions': user.watchlist.all()
+    })
+
+
+@login_required(login_url='login')
+def comment(request):
+    if request.method == 'POST':
+        user = get_user(request)
+        auction = AuctionListing.objects.get(pk=request.POST['id'])
+        if auction.is_active:
+            comment = Comment(
+                None, content=request.POST['content'], author=user, auction=auction)
+            comment.save()
+            return HttpResponseRedirect(reverse('single', kwargs={
+                'id': request.POST['id'],
+            }))
         pass
+    # else:
+    return HttpResponseRedirect(reverse('index'))
 
 
 @login_required(login_url='login')
 def single(request, id):
-    auction = AuctionListing.objects.get(id=id)
-    if auction.is_active == True:
+    try:
+        auction = AuctionListing.objects.get(id=id)
         user = get_user(request)
         bid = Bid(None, auction=auction, buyer=user)
         bid_form = BidForm(request.POST or None, instance=bid)
+        in_watchlist = False
 
         if (request.method == 'POST'):
             bid.offer = float(request.POST['offer'])
@@ -51,18 +113,29 @@ def single(request, id):
                 )
                 bid_form.add_error('offer', form_errors or None)
 
-        if get_user(request) == auction.auctioneer:
+        if user == auction.auctioneer:
             can_close = True
         else:
             can_close = False
+            try:
+                if user.watchlist.get(id=id):
+                    in_watchlist = True
+            except ObjectDoesNotExist:
+                pass
+
+        comment = auction.comments.all()[0]
+        print(comment.date)
 
         return render(request, "auctions/single.html", {
             'auction': auction,
             'form': bid_form,
             'can_close': can_close,
+            'in_watchlist': in_watchlist,
+            'comments': auction.comments.all(),
+            'comment_form': CommentForm(None),
         })
-    else:
-        return render(request, "auctions/closedauction.html")
+    except ObjectDoesNotExist:
+        return render(request, "auctions/noauction.html", status=404)
 
 
 @login_required(login_url='login')
